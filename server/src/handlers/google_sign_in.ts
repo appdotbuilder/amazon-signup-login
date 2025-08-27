@@ -1,31 +1,73 @@
+import { db } from '../db';
+import { usersTable } from '../db/schema';
 import { type GoogleSignInInput, type AuthResponse } from '../schema';
+import { eq, or } from 'drizzle-orm';
 
-export async function googleSignIn(input: GoogleSignInInput): Promise<AuthResponse> {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is:
-    // 1. Check if user already exists by google_id or email
-    // 2. If user exists, update their info and log them in
-    // 3. If user doesn't exist, create new user account with Google data
-    // 4. Generate JWT token for authentication
-    // 5. Return user data, token, and whether this is a new account
-    
-    const isNewUser = false; // This would be determined by database lookup
-    
-    const mockUser = {
-        id: 1,
-        email: input.email,
-        first_name: input.first_name,
-        last_name: input.last_name,
-        google_id: input.google_id,
-        phone_number: null,
-        is_email_verified: input.email_verified || true, // Google emails are typically verified
-        created_at: new Date(),
-        updated_at: new Date()
-    };
-    
+export const googleSignIn = async (input: GoogleSignInInput): Promise<AuthResponse> => {
+  try {
+    // First, try to find existing user by google_id or email
+    const existingUsers = await db.select()
+      .from(usersTable)
+      .where(
+        or(
+          eq(usersTable.google_id, input.google_id),
+          eq(usersTable.email, input.email)
+        )
+      )
+      .execute();
+
+    let user;
+    let isNewUser = false;
+
+    if (existingUsers.length > 0) {
+      // User exists - update their information
+      const existingUser = existingUsers[0];
+      
+      const updatedUsers = await db.update(usersTable)
+        .set({
+          google_id: input.google_id,
+          first_name: input.first_name,
+          last_name: input.last_name,
+          is_email_verified: input.email_verified ?? true,
+          updated_at: new Date()
+        })
+        .where(eq(usersTable.id, existingUser.id))
+        .returning()
+        .execute();
+
+      user = updatedUsers[0];
+    } else {
+      // New user - create account
+      const newUsers = await db.insert(usersTable)
+        .values({
+          email: input.email,
+          first_name: input.first_name,
+          last_name: input.last_name,
+          google_id: input.google_id,
+          password_hash: null, // Google users don't have passwords
+          phone_number: null,
+          is_email_verified: input.email_verified ?? true
+        })
+        .returning()
+        .execute();
+
+      user = newUsers[0];
+      isNewUser = true;
+    }
+
+    // Generate a mock JWT token (in real implementation, use proper JWT library)
+    const token = `jwt_${user.id}_${Date.now()}`;
+
+    // Return user data without password_hash
+    const { password_hash, ...userWithoutPassword } = user;
+
     return {
-        user: mockUser,
-        token: 'mock-jwt-token-here',
-        is_new_user: isNewUser
+      user: userWithoutPassword,
+      token,
+      is_new_user: isNewUser
     };
-}
+  } catch (error) {
+    console.error('Google sign-in failed:', error);
+    throw error;
+  }
+};

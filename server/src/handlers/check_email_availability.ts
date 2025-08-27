@@ -1,33 +1,45 @@
+import { db } from '../db';
+import { usersTable } from '../db/schema';
+import { eq } from 'drizzle-orm';
 import { type CheckEmailInput, type EmailAvailability } from '../schema';
 
-export async function checkEmailAvailability(input: CheckEmailInput): Promise<EmailAvailability> {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is:
-    // 1. Query the database to check if email already exists
-    // 2. If email is taken, optionally suggest similar available emails
-    // 3. Return availability status and suggestions
-    
-    const emailExists = false; // This would be determined by database lookup
-    
+export const checkEmailAvailability = async (input: CheckEmailInput): Promise<EmailAvailability> => {
+  try {
+    // Query the database to check if email already exists
+    const existingUsers = await db.select()
+      .from(usersTable)
+      .where(eq(usersTable.email, input.email))
+      .execute();
+
+    const emailExists = existingUsers.length > 0;
+
     if (emailExists) {
-        // Generate email suggestions if the original is taken
-        const emailParts = input.email.split('@');
-        const localPart = emailParts[0];
-        const domain = emailParts[1];
-        
-        const suggestions = [
-            `${localPart}.${Math.floor(Math.random() * 999)}@${domain}`,
-            `${localPart}_${Math.floor(Math.random() * 999)}@${domain}`,
-            `${localPart}${new Date().getFullYear()}@${domain}`
-        ];
-        
-        return {
-            available: false,
-            suggestions
-        };
+      // Generate email suggestions if the original is taken
+      const emailParts = input.email.split('@');
+      const localPart = emailParts[0];
+      const domain = emailParts[1];
+
+      // Generate deterministic suggestions for better user experience
+      const currentYear = new Date().getFullYear();
+      const suggestions = [
+        `${localPart}.${currentYear}@${domain}`,
+        `${localPart}_${currentYear}@${domain}`,
+        `${localPart}.user@${domain}`,
+        `${localPart}123@${domain}`,
+        `${localPart}_official@${domain}`
+      ];
+
+      return {
+        available: false,
+        suggestions
+      };
     }
-    
+
     return {
-        available: true
+      available: true
     };
-}
+  } catch (error) {
+    console.error('Email availability check failed:', error);
+    throw error;
+  }
+};
