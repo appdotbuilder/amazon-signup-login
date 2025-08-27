@@ -27,16 +27,33 @@ export function PasswordStrengthIndicator({ strength, password }: PasswordStreng
     switch (strength) {
       case 0:
       case 1:
-        return 'bg-red-500';
+        return 'from-red-400 to-red-600';
       case 2:
       case 3:
-        return 'bg-yellow-500';
+        return 'from-yellow-400 to-orange-500';
       case 4:
-        return 'bg-blue-500';
+        return 'from-blue-400 to-blue-600';
       case 5:
-        return 'bg-green-500';
+        return 'from-green-400 to-emerald-600';
       default:
-        return 'bg-red-500';
+        return 'from-red-400 to-red-600';
+    }
+  };
+
+  const getStrengthEmoji = (strength: number): string => {
+    switch (strength) {
+      case 0:
+      case 1:
+        return '🔴';
+      case 2:
+      case 3:
+        return '🟡';
+      case 4:
+        return '🔵';
+      case 5:
+        return '🟢';
+      default:
+        return '🔴';
     }
   };
 
@@ -44,19 +61,23 @@ export function PasswordStrengthIndicator({ strength, password }: PasswordStreng
     return [
       {
         text: 'At least 8 characters',
-        met: password.length >= 8
+        met: password.length >= 8,
+        emoji: '📏'
       },
       {
         text: 'One lowercase letter',
-        met: /[a-z]/.test(password)
+        met: /[a-z]/.test(password),
+        emoji: '🔤'
       },
       {
         text: 'One uppercase letter',
-        met: /[A-Z]/.test(password)
+        met: /[A-Z]/.test(password),
+        emoji: '🔠'
       },
       {
         text: 'One number',
-        met: /\d/.test(password)
+        met: /\d/.test(password),
+        emoji: '🔢'
       }
     ];
   };
@@ -64,37 +85,49 @@ export function PasswordStrengthIndicator({ strength, password }: PasswordStreng
   const requirements = getRequirements(password);
   const strengthLabel = getStrengthLabel(strength);
   const strengthColor = getStrengthColor(strength);
+  const strengthEmoji = getStrengthEmoji(strength);
 
   return (
-    <div className="mt-2 space-y-2">
+    <div className="mt-4 p-4 bg-gradient-to-r from-gray-50 to-slate-50 rounded-xl border border-gray-200/50 space-y-4">
       <div className="flex items-center justify-between">
-        <span className="text-xs text-gray-600">Password strength:</span>
-        <span className={`text-xs font-medium ${
-          strength <= 1 ? 'text-red-600' : 
-          strength <= 3 ? 'text-yellow-600' : 
-          strength === 4 ? 'text-blue-600' : 'text-green-600'
-        }`}>
-          {strengthLabel}
+        <span className="text-sm font-semibold text-gray-700 flex items-center space-x-2">
+          <span>🛡️</span>
+          <span>Password strength:</span>
         </span>
+        <div className="flex items-center space-x-2">
+          <span className="text-sm">{strengthEmoji}</span>
+          <span className={`text-sm font-bold ${
+            strength <= 1 ? 'text-red-600' : 
+            strength <= 3 ? 'text-orange-600' : 
+            strength === 4 ? 'text-blue-600' : 'text-emerald-600'
+          }`}>
+            {strengthLabel}
+          </span>
+        </div>
       </div>
       
-      {/* Strength bar */}
-      <div className="w-full bg-gray-200 rounded-full h-1.5">
+      {/* Enhanced strength bar */}
+      <div className="w-full bg-gray-200 rounded-full h-3 shadow-inner">
         <div 
-          className={`h-1.5 rounded-full transition-all duration-300 ${strengthColor}`}
+          className={`h-3 rounded-full transition-all duration-500 bg-gradient-to-r ${strengthColor} shadow-sm`}
           style={{ width: `${(strength / 5) * 100}%` }}
         ></div>
       </div>
 
-      {/* Requirements list */}
-      <div className="space-y-1">
+      {/* Enhanced requirements list */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         {requirements.map((req, index) => (
-          <div key={index} className="flex items-center space-x-2">
-            <div className={`text-xs ${req.met ? 'text-green-600' : 'text-gray-400'}`}>
-              {req.met ? '✓' : '○'}
+          <div key={index} className={`flex items-center space-x-3 p-2 rounded-lg transition-all duration-300 ${
+            req.met ? 'bg-green-50 border border-green-200' : 'bg-gray-50 border border-gray-200'
+          }`}>
+            <div className="text-sm flex-shrink-0">
+              {req.met ? '✅' : '⭕'}
             </div>
-            <span className={`text-xs ${req.met ? 'text-green-600' : 'text-gray-600'}`}>
-              {req.text}
+            <span className="text-sm flex items-center space-x-1">
+              <span className="text-xs">{req.emoji}</span>
+              <span className={`${req.met ? 'text-green-700 font-medium' : 'text-gray-600'}`}>
+                {req.text}
+              </span>
             </span>
           </div>
         ))}

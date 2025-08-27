@@ -7,6 +7,12 @@
   --dot-color: #000;
   --grid-color: rgba(0,0,0,0.05);
   --gradient-color: rgba(0,0,0,0.03);
+  
+  /* Amazon brand colors enhanced */
+  --amazon-orange: #ff9900;
+  --amazon-orange-dark: #e47911;
+  --amazon-blue: #232f3e;
+  --amazon-yellow: #febd69;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -31,12 +37,14 @@
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   min-height: 100vh;
-  background: #f9f9f9;
+  background: linear-gradient(135deg, #f8fafc 0%, #fff7ed 50%, #fef7cd 100%);
   color: #333;
-  line-height: 1.5;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Amazon-specific styles */
+/* Amazon-specific styles enhanced */
 .amazon-logo {
   font-family: Arial, sans-serif;
   font-weight: bold;
@@ -44,12 +52,144 @@ body {
 }
 
 .amazon-button {
-  background-color: #ff9900;
+  background: linear-gradient(135deg, #ff9900, #e47911);
   border: 1px solid #e47911;
   color: #000;
   font-weight: bold;
+  transition: all 0.3s ease;
 }
 
 .amazon-button:hover {
-  background-color: #e47911;
+  background: linear-gradient(135deg, #e47911, #cc6600);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 25px rgba(255, 153, 0, 0.3);
+}
+
+/* Custom animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Enhanced form styles */
+.form-input {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.form-input:focus {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+/* Glassmorphism effects */
+.glass {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+/* Enhanced shadows */
+.shadow-soft {
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+}
+
+.shadow-glow {
+  box-shadow: 0 0 30px rgba(255, 153, 0, 0.3);
+}
+
+/* Responsive improvements */
+@media (max-width: 640px) {
+  body {
+    font-size: 14px;
+  }
+  
+  .text-4xl {
+    font-size: 2rem;
+  }
+  
+  .text-3xl {
+    font-size: 1.5rem;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #ff9900, #e47911);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #e47911, #cc6600);
+}
+
+/* Focus styles for accessibility */
+.focus-visible:focus-visible {
+  outline: 2px solid #ff9900;
+  outline-offset: 2px;
+}
+
+/* Enhanced loading states */
+.loading-skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Print styles */
+@media print {
+  body {
+    background: white !important;
+  }
+  
+  .no-print {
+    display: none !important;
+  }
 }
